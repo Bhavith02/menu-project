@@ -2,6 +2,7 @@
 Cocktail , mocktail and Juice shop menu built using html, css and javascript.
 
 STEPS TO RUN THIS WEBPAGE:
+
 1)Download npm software.
 
 2)Download zip file of this project and store it in any desired location.
