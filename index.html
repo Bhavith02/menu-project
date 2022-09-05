@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link href="https://fonts.googleapis.com/css?family=Righteous" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/tachyons/css/tachyons.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="shortcut icon" type="image/png" href="/resources/lco.png" />
+  <title>Juice Joint</title>
+</head>
+
+<body>
+
+</body>
+<div id="nav">
+  <div id="subNav">
+    <img id="logo" src="/resources/logo.png" alt="logo">
+    <p>Juice Joint</p>
+  </div>
+  <ul>
+    <li><a href="#about">About</a></li>
+    <li><a href="#menu">Menu</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</div>
+
+<div class="h">
+  <p class="heading">Welcome to Juice Joint</p>
+  <h3>Find the best refreshments here....</h3>
+</div>
+
+
+
+
+<!--pictures from Adobe Stock-->
+<p id="loading">loading...</p>
+<div id="images">
+  <div class="lighten">
+    <img src="/resources/b1.jpg" alt="" />
+    <img src="/resources/b2.jpg" alt="" />
+    <img src="/resources/b3.jpg" alt="" />
+    <img src="/resources/b4.jpg" alt="" />
+    <img src="/resources/b5.jpg" alt="" />
+    <img src="/resources/b6.jpg" alt="" />
+    <img src="/resources/b1.jpg" alt="" />
+    <img src="/resources/b2.jpg" alt="" />
+    <img src="/resources/b3.jpg" alt="" />
+    <img src="/resources/b4.jpg" alt="" />
+    <img src="/resources/b5.jpg" alt="" />
+    <img src="/resources/b6.jpg" alt="" />
+  </div>
+  <div class="normal">
+    <img src="/resources/w7.jpg" alt="" />
+    <img src="/resources/w2.jpg" alt="" />
+    <img src="/resources/w3.jpg" alt="" />
+    <img src="/resources/w4.jpg" alt="" />
+    <img src="/resources/w5.jpg" alt="" />
+    <img src="/resources/w6.jpg" alt="" />
+    <img src="/resources/x1.jpg" alt="" />
+    <img src="/resources/x2.jpg" alt="" />
+    <img src="/resources/x3.jpg" alt="" />
+    <img src="/resources/x4.jpg" alt="" />
+    <img src="/resources/x5.jpg" alt="" />
+    <img src="/resources/x6.jpg" alt="" />
+  </div>
+  <nav>
+    <ul>
+      <li class="pre"></li>
+      <li class="next"></li>
+    </ul>
+  </nav>
+</div>
+
+<script type="text/javascript">
+/*
+Double exposure is photographic technique that combines 2 different images into a single image.
+Then I use this technique with canvas blend modes.
+*/
+window.onload = function(){
+var loading = document.getElementById("loading");
+loading.classList.add("loading-done");
+var property = {
+  element: "#images",
+  parallax: .6,
+  interval: 2200,
+  animDuration: 1300,
+  easing: easingInOutQuad
+}
+var slider = new DXslider(property);
+slider.init();
+}
+class DXslider{
+constructor(property){
+  this.images = document.querySelector(property.element);
+  this.preButton = document.querySelector(property.element + " nav .pre");
+  this.nextButton = document.querySelector(property.element + " nav .next");
+  this.lightenImages = document.querySelectorAll(".lighten img");
+  this.normalImages = document.querySelectorAll(".normal img");
+  this.canvasBox = document.createElement("div");
+  this.paraEffect = property.parallax; //have to clamp 0 ~ 1
+  this.canvasArray = [];
+  this.progress = 0;
+  this.animating = false;
+  this.interval = property.interval;
+  this.left = true;
+  this.duration = property.animDuration;
+  this.easing = property.easing;
+
+  this.images.appendChild(this.canvasBox);
+  this.canvasBox.classList.add("canvas");
+}
+init(){
+  this.settingStyle();
+  this.settingCanvas();
+
+  this.preButton.addEventListener("click", function(e){
+    if(!this.animating){
+      this.left = false;
+      clearTimeout(this.timer);
+      this.slide();
+    }
+  }.bind(this), false);
+
+  this.preButton.addEventListener("touchend", function(e){
+    if(!this.animating){
+      this.left = false;
+      clearTimeout(this.timer);
+      this.slide();
+    }
+  }.bind(this), false);
+
+  this.nextButton.addEventListener("click", function(e){
+    if(!this.animating){
+      this.left = true;
+      clearTimeout(this.timer);
+      this.slide();
+    }
+  }.bind(this), false);
+
+  this.nextButton.addEventListener("touchend", function(e){
+    if(!this.animating){
+      this.left = true;
+      clearTimeout(this.timer);
+      this.slide();
+    }
+  }.bind(this), false);
+}
+settingStyle(){
+  this.imagesWidth = this.images.offsetWidth;
+  this.width = this.lightenImages[0].width;
+  this.height = this.lightenImages[0].height;
+  this.dpi = this.width / this.imagesWidth;
+
+  this.images.style.height = this.canvasBox.style.height = this.imagesWidth * this.height / this.width + "px";
+
+  this.preButton.classList.add("after-loading");
+  this.nextButton.classList.add("after-loading");
+}
+settingCanvas(){
+  var canvas, context, normal, lighten, n;
+  for(var i = 0, len = this.normalImages.length * 2; i < len; i++){
+    canvas = document.createElement("canvas");
+    this.canvasBox.appendChild(canvas);
+    context = canvas.getContext("2d");
+
+    canvas.width = this.width;
+    canvas.height = this.height;
+    canvas.style.width = this.imagesWidth + "px";
+    canvas.style.height = this.imagesWidth * this.height / this.width + "px";
+
+    //add images(lighten and normal) into canvasArray
+    n = i % (len / 2);
+    normal = this.normalImages[n];
+    lighten = this.lightenImages[n];
+    this.canvasArray.push({
+      canvas: canvas, context: context, normal: normal, lighten: lighten
+    });
+  }
+
+  this.render(this.progress, -this.imagesWidth);
+  this.timer = setTimeout(this.slide.bind(this), this.interval);
+}
+slide(){
+  this.left ?
+  this.tween(-this.imagesWidth, this.duration, this.easing) :
+  this.tween(this.imagesWidth, this.duration, this.easing);
+}
+tween(change, duration, easingFunc){
+  var startTime = new Date();
+  this.progress = 0;
+  this.animating = true;
+  this.update(startTime, change, duration, easingFunc);
+}
+update(startTime, change, duration, easingFunc){
+  var time = new Date() - startTime;
+  if(time < duration){
+    this.progress = easingFunc(time / duration);
+    this.render(this.progress, change);
+    requestAnimationFrame(this.update.bind(this, startTime, change, duration, easingFunc));
+  } else {
+    if(this.left){
+      var firstEle = this.canvasArray[0];
+      this.canvasArray.shift();
+      this.canvasArray.push(firstEle);
+    } else {
+      var lastEle = this.canvasArray[this.canvasArray.length - 1];
+      this.canvasArray.pop();
+      this.canvasArray.unshift(lastEle);
+    }
+    this.progress = 1;
+    this.animating = false;
+    time = duration;
+    this.left = true;
+    this.render(0, -this.imagesWidth);
+    this.timer = setTimeout(this.slide.bind(this), this.interval);
+  }
+}
+render(progress, position){
+  for(var i = 0, len = this.canvasArray.length; i < len; i++){
+    var canvas = this.canvasArray[i].canvas;
+    canvas.style.setProperty("-webkit-transform", "translate(" + (progress * position - (len / 2 - i) * this.imagesWidth)  + "px, 0)");
+    canvas.style.transform = "translate(" + (progress * position - (len / 2 - i) * this.imagesWidth)  + "px, 0)";
+
+    var context = this.canvasArray[i].context;
+    context.clearRect(0, 0, this.width, this.height);
+    context.globalCompositeOperation = "source-over";
+    context.drawImage(this.canvasArray[i].normal, 0, 0, this.width, this.height);
+    context.globalCompositeOperation = "lighten";
+    context.drawImage(this.canvasArray[i].lighten, ((len / 2 - i) * this.imagesWidth - progress * position) * this.dpi * this.paraEffect, 0, this.width, this.height);
+  }
+}
+}
+//easing
+//prepare only easingInOutQuad
+function easingInOutQuad(t){
+return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+}
+</script>
+
+
+<div id="about" class="about">
+  <p class="heading">About</p>
+  <p class='p'>
+    Our shop is on a mission to create great tasting cocktails,mocktails and juices. Our menu is full of fresh offers that are equally craveable and guilt-free.
+    <br />
+    We take a lot of pride in serving products that are best in quality and quantity.<br />
+    We provide non alcoholic mixers and cocktail tonics.<br />
+    Also we prepare fresh juice from selected fresh pulpy fruits handpicked directly from our farms.
+  </p>
+</div>
+
+
+<p id="menu" class=" heading tc">Mocktail and Cocktail Menu</p>
+<div class="menu">
+  <div class=" item tc dib ma2 pa3 br3 grow bw2 shadow-5">
+    <img id="juice" src="/resources/x1.jpg" alt="cucLem">
+    <p class="f3">Cucumber and Lemon Drink</p>
+    <p>Lemonade Squash with cucumber</p>
+    <p id="rate">Rs. 100</p>
+  </div>
+  <div class=" item tc dib ma2 pa3 br3 grow bw2 shadow-5">
+    <img id="juice" src="/resources/x2.jpg" alt="raspberries">
+    <p class="f3">Raspberry Drink</p>
+    <p>Refreshing red translucent drinks with ice and raspberries. </p>
+    <p id="rate">Rs.90</p>
+  </div>
+  <div class=" item tc dib ma2 pa3 br3 grow bw2 shadow-5">
+    <img id="juice" src="/resources/x3.jpg" alt="yelorg">
+    <p class="f3">Yellow Orange Mix Drink</p>
+    <p>Spicy winter yellow orange cocktail with fresh tangerines </p>
+    <p id="rate">Rs. 110</p>
+  </div>
+  <div class="item tc dib ma2 pa3 br3 grow bw2 shadow-5">
+    <img id="juice" src="/resources/x4.jpg" alt="lemonade">
+    <p class="f3">Lemonade Drink</p>
+    <p>Two glasses of ice cold lemonade</p>
+    <p id="rate">Rs. 85</p>
+  </div>
+  <div class="item tc dib ma2 pa3 br3 grow bw2 shadow-5">
+    <img id="juice" src="/resources/xx2.jpg" alt="rose">
+    <p class="f3">Pink Rose Drink</p>
+    <p>Pink Rose mocktail with sunny summer light </p>
+    <p id="rate">Rs. 70</p>
+  </div>
+  <div class="item tc dib ma2 pa3 br3 grow bw2 shadow-5">
+    <img id="juice" src="/resources/x6.jpg" alt="pineapple">
+    <p class="f3">Shirley Cocktail</p>
+    <p>Boozy Refreshing Shirley Cocktail with Grenadine</p>
+    <p id="rate">Rs. 100</p>
+  </div>
+  <div class="item tc dib ma2 pa3 br3 grow bw2 shadow-5">
+    <img id="juice" src="/resources/xx5.jpg" alt="mango">
+    <p class="f3">Pear Cider</p>
+    <p>Pear cider in glasses standing on wooden rustic table </p>
+    <p id="rate">Rs. 125</p>
+  </div>
+  <div class="item tc dib ma2 pa3 br3 grow bw2 shadow-5">
+    <img id="juice" src="/resources/xx1.jpg" alt="4drink">
+    <p class="f3">Four Cocktail Drinks</p>
+    <p> Classic alcoholic long drink or mocktail highballs with berries, lime, herbs and ice </p>
+    <p id="rate">Rs. 250</p>
+  </div>
+</div>
+
+<p id="menu" class=" heading tc">Fruit juice Menu</p>
+<div class="menu">
+  <div class=" item tc dib ma2 pa3 br3 grow bw2 shadow-5">
+    <img id="juice" src="/resources/w2.jpg" alt="orange">
+    <p class="f3">Orange Squash</p>
+    <p>Pulpy Orange Squash</p>
+    <p id="rate">Rs. 50</p>
+  </div>
+  <div class=" item tc dib ma2 pa3 br3 grow bw2 shadow-5">
+    <img id="juice" src="/resources/w10.jpg" alt="apple">
+    <p class="f3">Apple Delight</p>
+    <p>Honey crisp apple mix</p>
+    <p id="rate">Rs.50</p>
+  </div>
+  <div class=" item tc dib ma2 pa3 br3 grow bw2 shadow-5">
+    <img id="juice" src="/resources/w3.jpg" alt="grapes">
+    <p class="f3">Grape Mix</p>
+    <p>Rich Black grapes squeezed</p>
+    <p id="rate">Rs. 60</p>
+  </div>
+  <div class="item tc dib ma2 pa3 br3 grow bw2 shadow-5">
+    <img id="juice" src="/resources/w7.jpg" alt="strawberry">
+    <p class="f3">Strawberry Red</p>
+    <p>Yummy red strawberries blended</p>
+    <p id="rate">Rs. 55</p>
+  </div>
+  <div class="item tc dib ma2 pa3 br3 grow bw2 shadow-5">
+    <img id="juice" src="/resources/w1.jpg" alt="watemelon">
+    <p class="f3">Watermelon Delight</p>
+    <p>Satisfy your thirst.</p>
+    <p id="rate">Rs. 50</p>
+  </div>
+  <div class="item tc dib ma2 pa3 br3 grow bw2 shadow-5">
+    <img id="juice" src="/resources/w4.jpg" alt="pineapple">
+    <p class="f3">Pineapple Shake</p>
+    <p>Sour and Sweet.</p>
+    <p id="rate">Rs. 50</p>
+  </div>
+  <div class="item tc dib ma2 pa3 br3 grow bw2 shadow-5">
+    <img id="juice" src="/resources/w11.jpg" alt="mango">
+    <p class="f3">Mango Shake</p>
+    <p>Mangoes blended with sugar.</p>
+    <p id="rate">Rs. 55</p>
+  </div>
+  <div class="item tc dib ma2 pa3 br3 grow bw2 shadow-5">
+    <img id="juice" src="/resources/w9.jpg" alt="Guava">
+    <p class="f3">Guava Richy</p>
+    <p>Guava blended to your taste.</p>
+    <p id="rate">Rs. 50</p>
+  </div>
+</div>
+
+
+<p class="heading tc">Contact Us</p>
+<div class="Contact">
+  <img id="contact" src="/resources/contact.jpg" alt="contact">
+
+  <p><span>Mail:</span> juicejoint@gmail.com</p>
+  <p><span>Phone:</span> 10283 79289</p>
+  <input type="text" placeholder="Any Suggestions..."/>
+  <button type="submit" value="post">Submit</button>
+</div>
+</body>
+
+</html>
