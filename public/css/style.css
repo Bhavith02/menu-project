@@ -119,7 +119,6 @@ a {
   position: relative;
   align-items: center;
   width: 50%;
-  left: calc(50% - 300px);
 }
 
 .canvas{
