@@ -76,7 +76,8 @@ a {
     border-radius: 50px;
 }
 .h {
-    margin-top:50px;
+    margin-top:60px;
+    padding-top:20px;
     display: flex;
     flex-direction: column;
     align-items: center;
