@@ -118,7 +118,7 @@ a {
 #images{
   position: relative;
   align-items: center;
-  width: 600px;
+  width: 100%;
   left: calc(50% - 300px);
 }
 
